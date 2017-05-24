@@ -1,5 +1,7 @@
+# ignore data files (most are too large for GitHub
 data-sample/*.csv
 data-sample/*.json
+*.bak
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
