@@ -22,7 +22,9 @@ def import_json_to_df(path):
             json_line = json.loads(line)
 
             # '__reference' is Datalinq internal and can be ignored (only in Facebook data)
-            json_line.pop('__reference', None)
+            col_names = {'__reference', '__location', '_id'}
+            for n in col_names:
+                json_line.pop(n, None)
 
             json_list.append(json_line)
             
