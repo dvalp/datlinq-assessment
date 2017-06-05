@@ -46,6 +46,7 @@ def apply_nlp_to_column(df, input_col='description'):
         NLP objects created from the text fields as a pandas series
     """
     #NOTE: This is using English language models on mostly Dutch text, new models should be built
+    #NOTE: This is single threaded, using `nlp.pipe` would allow multithreading but does not return a `pd.Series`
     
     nlp = spacy.load('en') # this assumes `python -m spacy download en` has been run after installing Spacy
 
