@@ -1,7 +1,9 @@
 import json
 import pandas as pd
 import spacy
+import string
 from pandas.io.json import json_normalize
+from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
 
 def import_json_to_df(path):
     """
@@ -87,4 +89,27 @@ def find_other_documents(ref_document, df, compare_column='description_nlp', lea
             .index
 
     return df.loc[idx_docs][['name', 'description']]
+
+def tokens_from_spacy(doc):
+    """
+    Takes a SpaCy Doc object rather than a normal string. Stores anything not in the stop words
+    and not standard punctuation in a list of strings (tokens).
+
+    INPUT
+        doc : SpaCy Doc
+            requires the Doc to have words and .lemma_
+
+    OUTPUT
+        tokens : list(str)
+            returns tokens as a list of strings
+    """
+    tokens = []
+
+    for word in doc:
+        if word.lemma_ == '-PRON-':
+            tokens.append(word.string.lower())
+        elif (word.lemma_.strip() not in ENGLISH_STOP_WORDS) and (word.lemma_.strip() not in string.punctuation):
+            tokens.append(word.lemma_)
+
+    return tokens
 
