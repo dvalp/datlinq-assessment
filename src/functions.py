@@ -48,8 +48,10 @@ def apply_nlp_to_column(df, input_col='description'):
     """
     #NOTE: This is using English language models on mostly Dutch text, new models should be built
     
+    input_index = df[df[input_col].notnull()].index
     nlp = spacy.load('en') # this assumes `python -m spacy download en` has been run after installing Spacy
 
-    nlp_gen = nlp.pipe(df_facebook[df_facebook['description'].notnull()]['description'], n_threads=6)
-    return pd.Series(nlp_gen, index=df_facebook[df_facebook['description'].notnull()].index)
+    nlp_gen = nlp.pipe(df[df[input_col].notnull()][input_col], n_threads=6)
+
+    return pd.Series(nlp_gen, index=input_index)
 
