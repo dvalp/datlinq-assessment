@@ -56,3 +56,35 @@ def apply_nlp_to_column(df, input_col='description'):
 
     return pd.Series(nlp_gen, index=input_index)
 
+def find_other_documents(ref_document, df, compare_column='description_nlp', least_similar=False, num_items=10):
+    """
+    Return either the most similar or least similar texts based on their cosine similarity. First create 
+    an Index based on the level of similarity, then return a slice of the DataFrame with index, name, and
+    description.
+
+    INPUT
+    ref_document : SpaCy Doc type
+        Any Spacy object that has `.similarity()` as a method
+    df : pandas dataframe
+        Any dataframe containing a column of SpaCy objects with vectors for similarity conparison
+    compare_column : string
+        Name of the column of objects to compare with ref_document
+    least_similar : boolean
+        False causes series to sort in descending order
+    num_items : int
+        Number of results to return
+
+    OUTPUT
+    Pandas DataFrame
+        Return a slice of a DataFrame with index number, item name, and item description.
+    """
+    #NOTE: Uses English models on Dutch text which damage the accuracy of the results, new models should be built
+
+    # Create an index of documents ordered by level of similarity to the reference
+    idx_docs = df[df[compare_column].notnull()][compare_column] \
+            .apply(ref_document.similarity) \
+            .sort_values(ascending=least_similar)[1:num_items + 1] \
+            .index
+
+    return df.loc[idx_docs][['name', 'description']]
+
