@@ -43,7 +43,8 @@ def apply_nlp_to_column(df, input_col='description'):
 
     OUTPUT
     Pandas series
-        NLP objects created from the text fields as a pandas series
+        NLP objects created from the text fields as a pandas series, with indexing to
+        match the original dataframe.
     """
     #NOTE: This is using English language models on mostly Dutch text, new models should be built
     
