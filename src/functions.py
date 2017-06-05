@@ -1,4 +1,5 @@
 import json
+import spacy
 from pandas.io.json import json_normalize
 
 def import_json_to_df(path):
@@ -30,3 +31,22 @@ def import_json_to_df(path):
             
     return json_normalize(json_list, sep='_')
 
+def apply_nlp_to_column(df, input_col='description'):
+    """
+    Pass in the dataframe and the column name to which NLP processing should be 
+    applied. This returns a pandas series of the objects created.
+
+    INPUT
+    df : pandas dataframe
+    input_col : string
+        The name of the column to process
+
+    OUTPUT
+    Pandas series
+        NLP objects created from the text fields as a pandas series
+    """
+    #NOTE: This is using English language models on mostly Dutch text, new models should be built
+    
+    nlp = spacy.load('en') # this assumes `python -m spacy download en` has been run after installing Spacy
+
+    return df[df[input_col].notnull()][input_col].apply(nlp)
