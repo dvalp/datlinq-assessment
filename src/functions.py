@@ -3,7 +3,6 @@ import pandas as pd
 import spacy
 import string
 from pandas.io.json import json_normalize
-from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
 
 def import_json_to_df(path):
     """
@@ -108,7 +107,7 @@ def tokens_from_spacy(doc):
     for word in doc:
         if word.lemma_ == '-PRON-':
             tokens.append(word.string.lower())
-        elif (word.lemma_.strip() not in ENGLISH_STOP_WORDS) and (word.lemma_.strip() not in string.punctuation):
+        elif word.lemma_.strip() not in string.punctuation:
             tokens.append(word.lemma_)
 
     return tokens
