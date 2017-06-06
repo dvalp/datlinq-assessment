@@ -1,8 +1,11 @@
 import json
+import numpy as np
 import pandas as pd
 import spacy
 import string
 from pandas.io.json import json_normalize
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 def import_json_to_df(path):
     """
@@ -91,8 +94,8 @@ def find_other_documents(ref_document, df, compare_column='description_nlp', lea
 
 def tokens_from_spacy(doc):
     """
-    Takes a SpaCy Doc object rather than a normal string. Stores anything not in the stop words
-    and not standard punctuation in a list of strings (tokens).
+    Takes a SpaCy Doc object rather than a normal string. Stores any words longer than 4 
+    characters and not standard punctuation in a list of strings (tokens).
 
     INPUT
         doc : SpaCy Doc
@@ -107,8 +110,20 @@ def tokens_from_spacy(doc):
     for word in doc:
         if word.lemma_ == '-PRON-':
             tokens.append(word.string.lower())
-        elif word.lemma_.strip() not in string.punctuation:
+        elif (word.lemma_.strip() not in string.punctuation) and (len(word.lemma_.strip()) > 3):
             tokens.append(word.lemma_)
 
-    return tokens
+    return ' '.join(tokens)
+
+def spacy_docs_to_df_tfidf(df, doc_col='description_nlp', max_df=0.9, min_df=10, max_features=1000):
+    tfidf_vec = TfidfVectorizer(max_df=max_df, min_df=min_df, max_features=max_features, stop_words='english')
+    tfidf = tfidf_vec.fit_transform(
+            df[df[doc_col].notnull()][doc_col]
+            .apply(tokens_from_spacy))
+    idx_tfidf = df[df[doc_col].notnull()].index
+
+    return pd.SparseDataFrame(tfidf, index=idx_tfidf), np.array(tfidf_vec.get_feature_names())
+
+def top_n_doc_tokens(doc_idx, df_tfidf, vocab, max_tokens=10):
+    return vocab[df_tfidf.loc[doc_idx].sort_values(ascending=False).dropna().index][:max_tokens]
 
