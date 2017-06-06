@@ -99,12 +99,12 @@ def tokens_from_spacy(doc):
     characters and not standard punctuation in a list of strings (tokens).
 
     INPUT
-        doc : SpaCy Doc
-            requires the Doc to have words and .lemma_
+    doc : SpaCy Doc
+        requires the Doc to have words and .lemma_
 
     OUTPUT
-        tokens : list(str)
-            returns tokens as a list of strings
+    tokens : list(str)
+        returns tokens as a list of strings
     """
     tokens = []
 
@@ -117,6 +117,25 @@ def tokens_from_spacy(doc):
     return ' '.join(tokens)
 
 def spacy_docs_to_df_tfidf(df, doc_col='description_nlp', max_df=0.9, min_df=10, max_features=1000):
+    """
+    Convert the SpaCy NLP doc objects into a sparse dataframe of vectors using tf-idf.
+
+    INPUT
+    df : pandas dataframe
+        Dataframe that contains the NLP parsed documents.
+    doc_col : string
+        The name of the column containing the NLP objects.
+    max_df : int or float
+        The maximum document frequency as total number or precent of total.
+    min_df : int
+        The minimum number of documents a term has to be in.
+    max_features : int
+        The maximum number of of terms to track.
+
+    OUTPUT
+    SparseDataFrame
+        Sparse dataframe matched to the index of the original dataframe for the document texts.
+    """
     tfidf_vec = TfidfVectorizer(max_df=max_df, min_df=min_df, max_features=max_features, stop_words='english')
     tfidf = tfidf_vec.fit_transform(
             df[df[doc_col].notnull()][doc_col]
@@ -126,5 +145,23 @@ def spacy_docs_to_df_tfidf(df, doc_col='description_nlp', max_df=0.9, min_df=10,
     return pd.SparseDataFrame(tfidf, index=idx_tfidf), np.array(tfidf_vec.get_feature_names())
 
 def top_n_doc_tokens(doc_idx, df_tfidf, vocab, max_tokens=10):
+    """
+    Use a document index, tfdif vector dataframe, and a vocabulary list to find the most important terms
+    using the vectors.
+
+    INPUT
+    doc_idx : int
+        The index of the document to pull terms from.
+    df_tfidf : SparseDataFrame
+        The sparse dataframe containing all the vectors for the documents.
+    vocab : numpy array
+        Array of terms to match to vectors.
+    max_tokens : int
+        Number of tokens to return.
+
+    OUTPUT
+    Numpy array
+        Slice of the terms in descending order of importance to the text.
+    """
     return vocab[df_tfidf.loc[doc_idx].sort_values(ascending=False).dropna().index][:max_tokens]
 
