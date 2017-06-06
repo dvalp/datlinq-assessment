@@ -56,7 +56,8 @@ def apply_nlp_to_column(df, input_col='description'):
     input_index = df[df[input_col].notnull()].index
     nlp = spacy.load('en') # this assumes `python -m spacy download en` has been run after installing Spacy
 
-    nlp_gen = nlp.pipe(df[df[input_col].notnull()][input_col], n_threads=-1)
+    #NOTE: `n_threads=-1` causes an out of memory error
+    nlp_gen = nlp.pipe(df[df[input_col].notnull()][input_col], n_threads=6)
 
     return pd.Series(nlp_gen, index=input_index)
 
