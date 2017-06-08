@@ -5,6 +5,7 @@ import spacy
 import string
 from pandas.io.json import json_normalize
 from sklearn.feature_extraction.text import TfidfVectorizer
+from spacy.nl.stop_words import STOP_WORDS as NL_STOP_WORDS
 
 
 def import_json_to_df(path):
@@ -111,7 +112,9 @@ def tokens_from_spacy(doc):
     for word in doc:
         if word.lemma_ == '-PRON-':
             tokens.append(word.string.lower())
-        elif (word.lemma_.strip() not in string.punctuation) and (len(word.lemma_.strip()) > 3):
+        elif (word.lemma_.strip() not in string.punctuation) \
+                and (len(word.lemma_.strip()) > 3) \
+                and (word not in NL_STOP_WORDS):
             tokens.append(word.lemma_)
 
     return ' '.join(tokens)
