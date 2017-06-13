@@ -114,7 +114,7 @@ def tokens_from_spacy(doc):
             tokens.append(word.string.lower())
         elif (word.lemma_.strip() not in string.punctuation) \
                 and (len(word.lemma_.strip()) > 3) \
-                and (word not in NL_STOP_WORDS):
+                and (word.lemma_.strip() not in NL_STOP_WORDS):
             tokens.append(word.lemma_)
 
     return ' '.join(tokens)
@@ -139,10 +139,10 @@ def spacy_docs_to_df_tfidf(df, doc_col='description_nlp', max_df=0.9, min_df=10,
     SparseDataFrame
         Sparse dataframe matched to the index of the original dataframe for the document texts.
     """
+    #NOTE: tf-idf creates a list of stop-words (too common or too rare) that can also be used to eliminate some words
     tfidf_vec = TfidfVectorizer(max_df=max_df, min_df=min_df, max_features=max_features, stop_words='english')
-    tfidf = tfidf_vec.fit_transform(
-            df[df[doc_col].notnull()][doc_col]
-            .apply(tokens_from_spacy))
+    tokens = df[df[doc_col].notnull()][doc_col].apply(tokens_from_spacy)
+    tfidf = tfidf_vec.fit_transform(tokens)
     idx_tfidf = df[df[doc_col].notnull()].index
 
     return pd.SparseDataFrame(tfidf, index=idx_tfidf), np.array(tfidf_vec.get_feature_names())
