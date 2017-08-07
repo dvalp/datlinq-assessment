@@ -111,13 +111,13 @@ def tokens_from_spacy(doc):
 
     for word in doc:
         if word.lemma_ == '-PRON-':
-            tokens.append(word.string.lower())
+            tokens.append(word.string.lower().strip())
         elif (word.lemma_.strip() not in string.punctuation) \
                 and (len(word.lemma_.strip()) > 3) \
                 and (word.lemma_.strip() not in NL_STOP_WORDS):
-            tokens.append(word.lemma_)
+            tokens.append(word.lemma_.strip())
 
-    return ' '.join(tokens)
+    return ' '.join(tokens).strip()
 
 def spacy_docs_to_df_tfidf(df, doc_col='description_nlp', max_df=0.9, min_df=10, max_features=1000):
     """
